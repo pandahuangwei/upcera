@@ -4,16 +4,18 @@ import com.sf.csim.express.service.CallExpressServiceTools;
 
 public class WayBills {
 
-    private static final String REQ_URL = "http://bsp-oisp.sf-express.com/bsp-oisp/sfexpressService";
-    private static final String CLIENT_CODE = "AECKQJS";//此处替换为您在丰桥平台获取的顾客编码
-    private static final String CHECK_WORD = "fCfDsgQatwYbF8dW9slS2WfRdqGbNAKO";//此处替换为您在丰桥平台获取的校验码
-
     private static CallExpressServiceTools client = CallExpressServiceTools.getInstance();
 
 
-    public static String getWayBillXml(String trackingNumber) {
-        String myReqXML = getReqXml(CLIENT_CODE, trackingNumber);
-        String rs = CallExpressServiceTools.getInstance().callSfExpressServiceByCSIM(REQ_URL, myReqXML, CLIENT_CODE, CHECK_WORD);
+    public static String getSZWayBillXml(String trackingNumber) {
+        String myReqXML = getReqXml(Propertys.SZ_CLIENT_CODE, trackingNumber);
+        String rs = client.callSfExpressServiceByCSIM(Propertys.SZ_REQ_URL, myReqXML, Propertys.SZ_CLIENT_CODE, Propertys.SZ_CHECK_WORD);
+        return rs;
+    }
+
+    public static String getSYWayBillXml(String trackingNumber) {
+        String myReqXML = getReqXml(Propertys.SY_CLIENT_CODE, trackingNumber);
+        String rs = client.callSfExpressServiceByCSIM(Propertys.SY_REQ_URL, myReqXML, Propertys.SY_CLIENT_CODE, Propertys.SY_CHECK_WORD);
         return rs;
     }
 
