@@ -1,6 +1,7 @@
 package com.upcera.util;
 
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -9,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,18 +26,69 @@ public class Excels {
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(Excels.class);
     public static final String PRE_STR = "var";
 
-    public static List<Map<String, Object>> readExcels(String filepath, String filename, int startRow, int startCol, int sheetNum) {
+    //执行读EXCEL操作,读出的数据导入List 2:从第3行开始；0:从第A列开始；0:第0个sheet
+    public static List<Map<String, Object>> readExcels(String filePath, String fileName, int startRow, int startCol, int sheetNum) {
         String extName = ""; // 扩展名格式：
-        if (filename.lastIndexOf(".") >= 0) {
-            extName = filename.substring(filename.lastIndexOf("."));
+        if (fileName.lastIndexOf(".") >= 0) {
+            extName = fileName.substring(fileName.lastIndexOf("."));
         }
         List<Map<String, Object>> rs = new ArrayList<>();
         if (".xls".equals(extName.toLowerCase())) {
-            rs = readXls(filepath, filename, startRow, startCol, sheetNum);
+            rs = readXls(filePath, fileName, startRow, startCol, sheetNum);
         } else if (".xlsx".equals(extName.toLowerCase())) {
-            rs = readXlsx(filepath, filename, startRow, startCol, sheetNum);
+            rs = readXlsx(filePath, fileName, startRow, startCol, sheetNum);
         }
         return rs;
+    }
+
+    public static Workbook writeXls(String[] titles, List<Map<String, String>> data,String sheetName) {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet(sheetName);
+
+        CellStyle headerStyle = workbook.createCellStyle(); //标题样式
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        Font headerFont = workbook.createFont();    //标题字体
+        headerFont.setBold(true);
+        headerFont.setFontHeightInPoints((short) 11);
+        headerStyle.setFont(headerFont);
+        short width = 20, height = 25 * 20;
+        sheet.setDefaultColumnWidth(width);
+        Cell cell;
+        //设置标题
+        for (int i = 0, len = titles.length; i < len; i++) {
+            cell = getCell(sheet, 0, i);
+            cell.setCellStyle(headerStyle);
+            cell.setCellValue(titles[i]);
+        }
+
+        sheet.getRow(0).setHeight(height);
+
+        CellStyle contentStyle = workbook.createCellStyle(); //内容样式
+        contentStyle.setAlignment(HorizontalAlignment.LEFT);
+
+        for (int i = 0, varCount = data.size(); i < varCount; i++) {
+            Map<String, String> map = data.get(i);
+            for (int j = 0, len = titles.length; j < len; j++) {
+                String varstr = map.get(PRE_STR + (j + 1)) != null ? map.get(PRE_STR + (j + 1)) : "";
+                cell = getCell(sheet, i + 1, j);
+                cell.setCellStyle(contentStyle);
+                cell.setCellValue(varstr);
+            }
+        }
+        return workbook;
+    }
+
+    private static Cell getCell(Sheet sheet, int row, int col) {
+        Row sheetRow = sheet.getRow(row);
+        if (sheetRow == null) {
+            sheetRow = sheet.createRow(row);
+        }
+        Cell cell = sheetRow.getCell(col);
+        if (cell == null) {
+            cell = sheetRow.createCell(col);
+        }
+        return cell;
     }
 
     /**
@@ -45,7 +99,7 @@ public class Excels {
      * @param sheetnum //sheet
      * @return list
      */
-    public static List<Map<String, Object>> readXls(String filepath, String filename, int startrow, int startcol, int sheetnum) {
+    private static List<Map<String, Object>> readXls(String filepath, String filename, int startrow, int startcol, int sheetnum) {
         List<Map<String, Object>> varList = new ArrayList<>();
 
         try {
@@ -112,7 +166,7 @@ public class Excels {
      * @param sheetNum sheet
      * @return list
      */
-    public static List<Map<String, Object>> readXlsx(String filepath, String filename, int startRow, int startCol, int sheetNum) {
+    private static List<Map<String, Object>> readXlsx(String filepath, String filename, int startRow, int startCol, int sheetNum) {
         List<Map<String, Object>> varList = new ArrayList<>();
 
         try {
@@ -179,7 +233,7 @@ public class Excels {
             return list;
         }
 
-        for (Map<String, Object> pd : list) {
+        for (Map<String, Object> pd : srcList) {
             String var0 = String.valueOf(pd.get(PRE_STR + "0"));
             if (var0 == null) {
                 continue;
