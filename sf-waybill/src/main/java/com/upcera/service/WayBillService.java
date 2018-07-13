@@ -87,8 +87,8 @@ public class WayBillService {
         //输出excel
         try {
             System.out.println("=====================================");
-            System.out.println("==本次应获取运单的轨迹数=" + billNos.size());
-            System.out.println("==实际获取运单的轨迹数=" + list.size());
+            System.out.println("==本次应获取运单的轨迹数= " + billNos.size());
+            System.out.println("==实际获取运单的轨迹数= " + list.size());
             System.out.println("=====================================");
 
             String outFile = "./" + billType + "-" + getTimeFormat() + ".xls";
