@@ -63,15 +63,20 @@ public class Excels {
         }
 
         sheet.getRow(0).setHeight(height);
+        sheet.setColumnWidth(1, 100*256);
 
         CellStyle contentStyle = workbook.createCellStyle(); //内容样式
         contentStyle.setAlignment(HorizontalAlignment.LEFT);
+        contentStyle.setWrapText(true);
 
         for (int i = 0, varCount = data.size(); i < varCount; i++) {
             Map<String, String> map = data.get(i);
             for (int j = 0, len = titles.length; j < len; j++) {
                 String varstr = map.get(PRE_STR + (j + 1)) != null ? map.get(PRE_STR + (j + 1)) : "";
                 cell = getCell(sheet, i + 1, j);
+                if (j==0) {
+                    contentStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+                }
                 cell.setCellStyle(contentStyle);
                 cell.setCellValue(varstr);
             }

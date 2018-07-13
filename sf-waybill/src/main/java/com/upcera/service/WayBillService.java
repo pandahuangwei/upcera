@@ -2,15 +2,11 @@ package com.upcera.service;
 
 import com.thoughtworks.xstream.XStream;
 import com.upcera.constant.Constants;
-import com.upcera.entity.Body;
 import com.upcera.entity.Response;
 import com.upcera.entity.Route;
-import com.upcera.entity.RouteResponse;
 import com.upcera.util.Excels;
 import com.upcera.util.WayBills;
-import org.apache.commons.codec.binary.StringUtils;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +35,7 @@ public class WayBillService {
     private static final String acceptAddress = "acceptAddress";
 
     private static XStream xstream;
+
     static {
         xstream = new XStream();
         XStream.setupDefaultSecurity(xstream);
@@ -53,10 +50,14 @@ public class WayBillService {
      544148231544*/
     public void getWayBills() {
         List<String> billNos = getWayBillNo(SZ_FILE_NAME);
-        getWayBills(billNos, BILL_TYPE_SZ);
+        if (billNos != null && !billNos.isEmpty()) {
+            getWayBills(billNos, BILL_TYPE_SZ);
+        }
 
         billNos = getWayBillNo(SY_FILE_NAME);
-        getWayBills(billNos, BILL_TYPE_SY);
+        if (billNos != null && !billNos.isEmpty()) {
+            getWayBills(billNos, BILL_TYPE_SY);
+        }
     }
 
 
@@ -71,19 +72,26 @@ public class WayBillService {
             }
 
             if (wayBillXml == null || wayBillXml == "" || !isContainRoute(wayBillXml)) {
-                System.out.println("运单：" + billNo + " 无法获取轨迹.");
+                System.out.println("运单：" + billNo + " 获取轨迹失败....");
                 continue;
             }
             wayBillXml = wayBillXml.replaceAll(ACCEPT_TIME, acceptTime).replaceAll(ACCEPT_ADDRESS, acceptAddress);
             Response mailconfig = (Response) xstream.fromXML(wayBillXml);
-
+            System.out.println("运单：" + billNo + " 获取轨迹成功.");
             list.add(mailconfig);
+        }
+        if(list.isEmpty()) {
+            return;
         }
         List<Map<String, String>> data = reSetData(list);
         //输出excel
         try {
+            System.out.println("=====================================");
+            System.out.println("==本次应获取运单的轨迹数=" + billNos.size());
+            System.out.println("==实际获取运单的轨迹数=" + list.size());
+            System.out.println("=====================================");
 
-            String outFile = "./" + billType + getTimeFormat() + ".xls";
+            String outFile = "./" + billType + "-" + getTimeFormat() + ".xls";
             System.out.println("开始生成Excel:" + outFile);
             String[] title = new String[]{"运单号", "运单轨迹"};
             Workbook workbook = Excels.writeXls(title, data, "运单轨迹");
@@ -105,8 +113,8 @@ public class WayBillService {
             Map<String, String> map = new HashMap<>();
             String mailNo = r.getBody().getRouteResponse().getMailno();
             List<Route> routes = r.getBody().getRouteResponse().getRoutes();
-            map.put(Constants.PRE_STR + "0", mailNo);
-            map.put(Constants.PRE_STR + "1", toString(routes));
+            map.put(Constants.PRE_STR + "1", mailNo);
+            map.put(Constants.PRE_STR + "2", toString(routes));
             lst.add(map);
         }
 
@@ -130,7 +138,7 @@ public class WayBillService {
 
     private String getTimeFormat() {
         int i = (int) (1 + Math.random() * (10 - 1 + 1));
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH24mmss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
         String str = sdf.format(new Date());
         return str + i;
     }
