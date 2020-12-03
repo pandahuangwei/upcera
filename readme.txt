@@ -3,12 +3,12 @@
 ##深圳
 sz_req_url=http://bsp-oisp.sf-express.com/bsp-oisp/sfexpressService
 sz_client_code=AECKQJS
-sz_check_word=fCfDsgQatwYbF8dW9slS2WfRdqGbNAKO
+sz_check_word=fCfDsgQatwYbF8dW9slS2WfRdqGbNA
 
 ##沈阳
 sy_req_url=http://bsp-oisp.sf-express.com/bsp-oisp/sfexpressService
 sy_client_code=AECKQJSR
-sy_check_word=fCfDsgQatwYbF8dW9slS2WfRdqGbNAKOG
+sy_check_word=fCfDsgQatwYbF8dW9slS2WfRdqGbNA
 深圳的配置正确，只能获取到深圳的运单信息。
 沈阳的运单信息的话，需要用沈阳的月结账号在丰桥上新开一个账号重新申请客户编码(client_code)
 和验证码(check_word),当申请得沈阳的账号的时候，将配置信息配置到上面的sy_client_code、sy_check_word
